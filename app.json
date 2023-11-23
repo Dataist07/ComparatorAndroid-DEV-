@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Comparator",
+    "slug": "Comparator",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.minh0797.Comparator"
+    },
+    "android": {
+      "package": "com.minh0797.Comparator",
+      "versionCode":2,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+      
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1d2e618d-7111-4215-85ee-57993558c526"
+      }
+    }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-3515253820147436~7971391760",
+    "ios_app_id": "ca-app-pub-3515253820147436~3696706118"
+  }
+}
