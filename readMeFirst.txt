@@ -16,6 +16,9 @@ Env reactnative to setup
 npm i react-native-rename
 npm i axios
 7. admob : npm i react-native-google-mobile-ads@12.2.0
+npm install @react-navigation/drawer
+
+
 
 prebuild :
 npx expo prebuild

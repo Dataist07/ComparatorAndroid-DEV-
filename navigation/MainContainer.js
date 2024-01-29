@@ -12,8 +12,8 @@ import SearchSupermarket from './screens/SearchSupermarket';
 import SearchProducts from './screens/SearchProducts';
 import PricePerSupermarket from './screens/PricePerSupermarket';
 import ListCourses from './screens/ListProductsStack/ListPtoductsBySupermarket';
-
 import ListProductsBySupermarket from './screens/ListProductsStack/ListPtoductsBySupermarket';
+
 
 // stack
 const SupermarketStack = createNativeStackNavigator();

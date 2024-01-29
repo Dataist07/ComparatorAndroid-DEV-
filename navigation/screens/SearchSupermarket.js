@@ -10,7 +10,10 @@ import {
   SafeAreaView,
   Button,
   TouchableOpacity,
+  
 } from "react-native";
+
+
 import { StatusBar } from "expo-status-bar";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -28,6 +31,11 @@ const interstitial = InterstitialAd.createForAdRequest(adInterId , {
 const SearchSupermarket = ({navigation}) => {
 
   const [interstitialLoaded, setInterstitialLoaded] = useState(false);
+  const [data, setData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const loadInterstitial = () => {
     const unsubscribeLoaded = interstitial.addAdEventListener(
@@ -61,11 +69,7 @@ const SearchSupermarket = ({navigation}) => {
     };
   }, [])
 
-  const [data, setData] = useState([]);
-  const [originalData, setOriginalData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
-  const [selectedItems, setSelectedItems] = useState([]);
+  
 
   const url = "https://bubu0797.pythonanywhere.com/api/supermarket/";
 
@@ -93,24 +97,42 @@ const SearchSupermarket = ({navigation}) => {
     }
   };
 
-  const handleConfirmSelection = () => {
-    const selectedNomDrives = selectedItems.map(item => item.nom_driveUrl);
-    navigation.navigate("Trouvez vos produits", {paramKey: selectedNomDrives});
-    console.log(selectedItems);
-    //setSelectedItems([]);
+
+  const handleConfirmSelection = async () => {
+    const selectedDrives = selectedItems.map((item) => ({
+      nom_drive: item.nom_drive,
+      nom_driveUrl: item.nom_driveUrl,
+      dateScraped: item.dateScraped,
+    }));
+    navigation.navigate("Trouvez vos produits", { selectedDrives });
   };
+  
+  
   
   const resetSelection = () => {
     setSelectedItems([]);
   };
 
-  const handleSearch = () => {
-    const filteredData = originalData.filter((item) =>
-      item.city.toLowerCase().includes(searchText.toLowerCase())
+  const filteredData = searchQuery
+  ? originalData.filter((item) => {
+
+      const itemDataWithoutAccent = item.city ? item.city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+      const textParts = searchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(' ');
+      let shouldIncludeWithoutAccent = true;
       
-    );
-    setData(filteredData);
-    
+      for (let i = 0; i < textParts.length; i++) {
+        const part = textParts[i];
+        shouldIncludeWithoutAccent = shouldIncludeWithoutAccent && (itemDataWithoutAccent.indexOf(part) > -1);
+        if (!shouldIncludeWithoutAccent){
+          return false;
+        }
+      }
+      return true;
+    })
+  : [];
+
+  const resetSearch = () => {
+    setSearchQuery('');
   };
 
   const renderItem = ({ item }) => {
@@ -163,44 +185,59 @@ const SearchSupermarket = ({navigation}) => {
  
   return (
     <SafeAreaView style={styles.container}>
+      
       <View style={styles.searchContainer}>
+        <View></View>
         <TextInput
           style={styles.searchInput}
-          placeholder="Code postales"
-          value={searchText}
-          onChangeText={setSearchText}
+          placeholder="Code postal ou nom de votre ville"
+          onChangeText={(query) => setSearchQuery(query)}
+          value={searchQuery}
         />
-        <Pressable onPress={handleSearch} style={styles.searchButton}>
-          <Text style={styles.searchButtonText}>Chercher</Text>
+        <Pressable onPress={resetSearch} style={styles.searchButton}>
+          <Text style={styles.searchButtonText}>Reset</Text>
         </Pressable>
       </View>
       {loading ? (
-        <Text>Loading ....</Text>
-      ) : (
-        <>
-          <FlatList
-            data={data}
-           
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id.toString()}
-          />
-          {selectedItems.length > 0 && (
-            <View style={styles.selectionContainer}>
-              <Button title="Reset" onPress={resetSelection} />
-              <Text style={styles.selectionText}>
-                Limite : {selectedItems.length}/2
-              </Text>
-              
-                <Button title="Choisir" onPress=
-                  {() =>{ 
-                    //interstitial.show();
-                    handleConfirmSelection();
-                  }}/> 
+        <View style={styles.text}>
+          <Text>Loading ....</Text>
+        </View>
+      ) : searchQuery === '' ? (
+        <View style={styles.text}>
+          <Text >Commencez à taper dans la barre de recherche pour afficher les supermarchés</Text>
+        </View>
+        ) : filteredData.length > 0 ?(
+          <>
+            <FlatList
+              data={filteredData}
+            
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id.toString()}
+            />
+
+            {selectedItems.length > 0 && (
+              <View style={styles.selectionContainer}>
+                <Button title="Reset" onPress={resetSelection} />
+                <Text style={styles.selectionText}>
+                  Limite : {selectedItems.length}/2
+                </Text>
                 
-            </View>
-          )}
-        </>
+                  <Button title="Choisir" onPress=
+                    {() =>{ 
+                      //interstitial.show();
+                      handleConfirmSelection();
+                    }}/> 
+                  
+              </View>
+            )}
+          </>
+      ) : (
+        <View style={styles.text}>
+          <Text >Nous n'avons pas trouvé de supermarché dans cette ville </Text>
+        </View>
       )}
+
+      
       <BannerAd 
         unitId={adUnitId}
         size={BannerAdSize.FULL_BANNER}
@@ -217,6 +254,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 10,
+  },
+  text: {
+    flex:1,
+    alignItems: 'center',
+    justifyContent: 'center',
+   
+    
+    
   },
   searchContainer: {
     marginVertical: 10,

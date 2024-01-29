@@ -16,7 +16,7 @@ import { addToCart, decrementQuantity, incrementQuantity, removeFromCart } from 
 import { useState, useEffect } from "react";
 import { BannerAd, BannerAdSize, TestIds, InterstitialAd, AdEventType, RewardedInterstitialAd, RewardedAdEventType } from 'react-native-google-mobile-ads';
 
-const adUnitId = __DEV__ ? TestIds.BANNER : 'ca-app-pub-3515253820147436/7984640105';
+
 const SearchProductSupermarketFiltered = ({ data }) => {
   const carrefourImage = 'https://upload.wikimedia.org/wikipedia/fr/thumb/3/3b/Logo_Carrefour.svg/1200px-Logo_Carrefour.svg.png';
   const auchanImage = 'https://logo-marque.com/wp-content/uploads/2021/02/Auchan-Logo.png';
@@ -155,31 +155,28 @@ const SearchProductSupermarketFiltered = ({ data }) => {
           value={searchQuery}
           placeholder="Nom produit"
         />
-          {sortedData.length > 0 ? (
-            <>
-              <FlatList
-                data={sortedData}
-                
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                estimatedItemSize={300}
-              />
-            </>
-          
-          ) : (
-            <Text> Produits pas trouvé </Text>
+          {searchQuery === '' ? (
+            <View style={styles.text}>
+              <Text>Commencez à taper dans la barre de recherche pour afficher les produit</Text>
+            </View>
+            ) : sortedData.length > 0 ? (
+              <>
+                <FlatList
+                  data={sortedData}
+                  keyExtractor={(item) => item.id}
+                  renderItem={renderItem}
+                  estimatedItemSize={300}
+                />
+              </>
+            ) : (
+            <View style={styles.text}>
+              <Text>Produit pas trouvé </Text>
+            </View>
           )}
 
           
       </SafeAreaView>
-        <BannerAd style={styles.ad}
-          unitId={adUnitId}
-          size={BannerAdSize.FULL_BANNER}
-          requestOptions={{
-              requestNonPersonalizedAdsOnly: true
-          }}
-        />
-      
+       
     </SafeAreaView>
     
   );
@@ -187,9 +184,15 @@ const SearchProductSupermarketFiltered = ({ data }) => {
 const styles = StyleSheet.create({
   container: {
 
-    height: '86%',
+    height: '100%',
     marginVertical: 5,
    
+  },
+  text: {
+    flex:1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    
   },
   item: {
    flexDirection: "row",
